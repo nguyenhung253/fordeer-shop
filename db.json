@@ -1,0 +1,116 @@
+{
+  "drinks": [
+    {
+      "id": 1,
+      "name": "Rừng Pac",
+      "category": "Chai",
+      "price": 95000,
+      "image": "/public/coffee.png",
+      "description": "Trà sữa Rừng Pac với hương vị đặc trưng"
+    },
+    {
+      "id": 2,
+      "name": "Rừng Nâu",
+      "category": "Chai",
+      "price": 95000,
+      "image": "/public/coffee.png",
+      "description": "Trà sữa Rừng Nâu thơm ngon"
+    },
+    {
+      "id": 3,
+      "name": "Rừng Amazon",
+      "category": "Chai",
+      "price": 110000,
+      "image": "/public/coffee.png",
+      "description": "Trà sữa Rừng Amazon cao cấp"
+    },
+    {
+      "id": 4,
+      "name": "Rừng Amazon",
+      "category": "Chai",
+      "price": 48000,
+      "image": "/public/coffee.png",
+      "description": "Trà sữa Rừng Amazon size nhỏ"
+    },
+    {
+      "id": 5,
+      "name": "Cà Phê Kem dừa",
+      "category": "Cà Phê",
+      "price": 52000,
+      "image": "/public/coffee.png",
+      "description": "Cà phê kem dừa mát lạnh"
+    },
+    {
+      "id": 6,
+      "name": "Bạc sỉu",
+      "category": "Cà Phê",
+      "price": 42000,
+      "image": "/public/coffee.png",
+      "description": "Bạc sỉu truyền thống"
+    },
+    {
+      "id": 7,
+      "name": "Cà Phê Sữa",
+      "category": "Cà Phê",
+      "price": 35000,
+      "image": "/public/coffee.png",
+      "description": "Cà phê sữa đá đậm đà"
+    },
+    {
+      "id": 8,
+      "name": "Cà Phê Đen",
+      "category": "Cà Phê",
+      "price": 35000,
+      "image": "/public/coffee.png",
+      "description": "Cà phê đen nguyên chất"
+    },
+    {
+      "id": 9,
+      "name": "Latte",
+      "category": "Cà Phê",
+      "price": 58000,
+      "image": "/public/coffee.png",
+      "description": "Latte thơm béo"
+    },
+    {
+      "id": 10,
+      "name": "Americano",
+      "category": "Cà Phê",
+      "price": 48000,
+      "image": "/public/coffee.png",
+      "description": "Americano đậm chất Ý"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Chai",
+      "description": "Các loại trà sữa đóng chai"
+    },
+    {
+      "id": 2,
+      "name": "Cà Phê",
+      "description": "Các loại cà phê truyền thống và hiện đại"
+    },
+    {
+      "id": 3,
+      "name": "Trà",
+      "description": "Các loại trà"
+    },
+    {
+      "id": 4,
+      "name": "Nước Ép",
+      "description": "Nước ép trái cây tươi"
+    },
+    {
+      "id": 5,
+      "name": "Đồ Đá Xay",
+      "description": "Các loại đồ uống đá xay"
+    },
+    {
+      "id": 6,
+      "name": "Healthy",
+      "description": "Đồ uống lành mạnh"
+    }
+  ]
+}
