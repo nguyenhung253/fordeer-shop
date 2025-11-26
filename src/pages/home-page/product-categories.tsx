@@ -1,69 +1,34 @@
-const categories = [
-  {
-    label: "Cà phê",
-    image: "/ca-phe.png",
-    bgColor: "#45690b",
-    textColor: "#799a01",
-  },
-  {
-    label: "Healthy",
-    image: "/healthy.png",
-    bgColor: "#ebebea",
-    textColor: "#799a01",
-  },
-  {
-    label: "Nước ép",
-    image: "/nuoc-ep.png",
-    bgColor: "#ebebea",
-    textColor: "#799a01",
-  },
-  { label: "Trà", image: "/tra.png", bgColor: "#ebebea", textColor: "#799a01" },
-  {
-    label: "Đồ đá xay",
-    image: "/do-da-xay.png",
-    bgColor: "#ebebea",
-    textColor: "#799a01",
-  },
-];
-
 export default function ProductCategories() {
   return (
-    <section className="py-16 bg-[#fcfcf6]">
+    <section className="py-16 bg-[#fcfcf6] mb-20">
       <div className="max-w-[1152px] mx-auto px-4">
-        {/* Section Title */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <div className="h-px bg-[#45690b] flex-1 max-w-[221px]"></div>
-          <h2 className="text-[26px] font-bold text-[#45690b] text-center uppercase whitespace-nowrap">
-            Sản phẩm của Fordeer
-          </h2>
-          <div className="h-px bg-[#45690b] flex-1 max-w-[221px]"></div>
+        {/* Story Section */}
+        <div className="max-w-[900px] mx-auto text-center mb-12">
+          <h3 className="text-[56px] font-bold text-[#45690b] mb-6 uppercase">
+            Chuyện "Nhà"
+          </h3>
+          <p className="text-[30px] text-[#1d4220] leading-relaxed mb-8">
+            Fordeer Coffee tin rằng, nụ cười là hương vị ngọt ngào nhất trong
+            mỗi ngày mới. Từ những ly cà phê đậm đà, những tách trà thanh mát,
+            đến từng lời chào thân quen, chúng tôi mong mỗi vị khách khi ghé Nhà
+            đều mang theo một niềm vui nhỏ – để rồi nụ cười ấy lại được lan toả
+            khắp nơi.
+          </p>
+          <button className="bg-[#45690b] text-white px-8 py-3 rounded-full text-[16px] font-bold hover:bg-[#42612e] transition-colors uppercase">
+            Tìm hiểu
+          </button>
         </div>
 
-        {/* Categories */}
-        <div className="flex justify-center gap-12">
-          {categories.map((category, index) => (
-            <button
-              key={index}
-              className="flex flex-col items-center gap-3 group hover:scale-105 transition-all"
-            >
-              <div
-                className="w-24 h-24 rounded-full flex items-center justify-center transition-all"
-                style={{ backgroundColor: category.bgColor }}
-              >
-                <img
-                  src={category.image}
-                  alt={category.label}
-                  className="w-20 h-20 object-contain"
-                />
-              </div>
-              <span
-                className="text-[14px] font-bold"
-                style={{ color: category.textColor }}
-              >
-                {category.label}
-              </span>
-            </button>
-          ))}
+        {/* Banner Images Grid */}
+        <div className="relative max-w-[900px] mx-auto">
+          {/* Main center image */}
+          <div className="mt-[100px] rounded-2xl overflow-hidden shadow-xl">
+            <img
+              src="/banner-home.png"
+              alt="Fordeer Coffee Story"
+              className="w-full h-auto object-cover"
+            />
+          </div>
         </div>
       </div>
     </section>

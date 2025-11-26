@@ -1,6 +1,6 @@
 export default function Hero() {
   return (
-    <section className="relative w-full h-[607px] overflow-hidden bg-[#ede8ea]">
+    <section className="relative w-full h-[607px] overflow-hidden bg-[#ede8ea] mb-20">
       {/* Background Image */}
       <div className="absolute inset-0 flex">
         <div className="w-[489px] bg-[#ede8ea]"></div>
