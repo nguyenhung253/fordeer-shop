@@ -4,7 +4,7 @@ export default function CartSummary() {
   const [promoCode, setPromoCode] = useState("");
 
   // Mock data - in real app, this would come from cart state
-  const subtotal = 352000;
+  const subtotal = 2000;
   const shipping = 0;
   const discount = 0;
   const total = subtotal - discount + shipping;
