@@ -80,4 +80,13 @@ export const authService = {
   getAccessToken: (): string | null => {
     return localStorage.getItem('accessToken');
   },
+
+  /**
+   * Update current user in localStorage and trigger update event
+   */
+  updateCurrentUser: (user: Customer): void => {
+    localStorage.setItem('user', JSON.stringify(user));
+    // Dispatch custom event to notify components of user update
+    window.dispatchEvent(new CustomEvent('userUpdated', { detail: user }));
+  },
 };

@@ -1,10 +1,24 @@
 import { authService } from "@/services/authService";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ProfileDropdown from "./profile-dropdown";
 
 export default function Header() {
   const location = useLocation();
-  const isAuthenticated = authService.isAuthenticated();
+  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+
+  useEffect(() => {
+    // Listen for user updates to refresh auth state
+    const handleUserUpdate = () => {
+      setIsAuthenticated(authService.isAuthenticated());
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+
+    return () => {
+      window.removeEventListener('userUpdated', handleUserUpdate);
+    };
+  }, []);
 
   const isActive = (path: string) => location.pathname === path;
 

@@ -1,12 +1,15 @@
 export interface Customer {
-  _id: string;
-  username: string;
+  id: number;
+  customerCode: string;
+  fullName: string;
   email: string;
-  phone?: string;
+  phone?: string | null;
+  address?: string | null;
+  birthYear?: number | null;
   avatarUrl?: string;
-  role: 'customer';
-  createdAt?: string;
-  updatedAt?: string;
+  // Optional fields for compatibility or future use
+  username?: string;
+  role?: string;
 }
 
 export interface LoginRequest {
@@ -24,4 +27,15 @@ export interface LoginResponse {
 export interface AuthState {
   user: Customer | null;
   isAuthenticated: boolean;
+}
+
+export interface UpdateProfileRequest {
+  username?: string;
+  phone?: string;
+  avatar?: File;
+}
+
+export interface UpdateProfileResponse {
+  message: string;
+  customer: Customer;
 }

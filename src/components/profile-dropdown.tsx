@@ -1,5 +1,6 @@
 import { authService } from '@/services/authService';
 import type { Customer } from '@/types/auth';
+import { getDisplayName, getInitial } from '@/utils/user';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -12,6 +13,17 @@ export default function ProfileDropdown() {
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
+
+    // Listen for user updates
+    const handleUserUpdate = (event: any) => {
+      setUser(event.detail);
+    };
+
+    window.addEventListener('userUpdated', handleUserUpdate);
+
+    return () => {
+      window.removeEventListener('userUpdated', handleUserUpdate);
+    };
   }, []);
 
   useEffect(() => {
@@ -46,9 +58,20 @@ export default function ProfileDropdown() {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 hover:opacity-80 transition-opacity"
       >
-        <div className="w-8 h-8 rounded-full bg-[#45690b] flex items-center justify-center text-white font-bold text-sm">
-          {user.username?.charAt(0).toUpperCase() || 'U'}
-        </div>
+        {user.avatarUrl ? (
+          <img
+            src={user.avatarUrl}
+            alt={getDisplayName(user)}
+            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-[#45690b] flex items-center justify-center text-white font-bold text-sm">
+            {getInitial(user)}
+          </div>
+        )}
+        <span className="hidden md:block text-sm font-medium text-gray-700">
+          {getDisplayName(user)}
+        </span>
       </button>
 
       {/* Dropdown Menu */}
@@ -56,7 +79,7 @@ export default function ProfileDropdown() {
         <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
           {/* User Info */}
           <div className="px-4 py-3 border-b border-gray-100">
-            <p className="font-semibold text-gray-800 text-sm">{user.username}</p>
+            <p className="font-semibold text-gray-800 text-sm">{getDisplayName(user)}</p>
             <p className="text-xs text-gray-500 truncate">{user.email}</p>
           </div>
 

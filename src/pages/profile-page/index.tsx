@@ -1,15 +1,22 @@
+import EditProfileModal from '@/components/edit-profile-modal';
 import Header from '@/components/header';
 import { authService } from '@/services/authService';
 import type { Customer } from '@/types/auth';
+import { getDisplayName, getInitial } from '@/utils/user';
 import { useEffect, useState } from 'react';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<Customer | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
     setUser(currentUser);
   }, []);
+
+  const handleProfileUpdate = (updatedUser: Customer) => {
+    setUser(updatedUser);
+  };
 
   if (!user) {
     return (
@@ -43,14 +50,22 @@ export default function ProfilePage() {
                 <div className="flex flex-col items-center space-y-4">
                   {/* Avatar */}
                   <div className="relative">
-                    <div className="h-24 w-24 rounded-full bg-[#45690b] flex items-center justify-center text-white text-3xl font-bold">
-                      {user.username?.charAt(0).toUpperCase() || 'U'}
-                    </div>
+                    {user.avatarUrl ? (
+                      <img
+                        src={user.avatarUrl}
+                        alt={getDisplayName(user)}
+                        className="h-24 w-24 rounded-full object-cover border-2 border-gray-200"
+                      />
+                    ) : (
+                      <div className="h-24 w-24 rounded-full bg-[#45690b] flex items-center justify-center text-white text-3xl font-bold">
+                        {getInitial(user)}
+                      </div>
+                    )}
                   </div>
 
                   {/* User Info */}
                   <div className="text-center">
-                    <h3 className="text-xl font-semibold text-gray-800">{user.username}</h3>
+                    <h3 className="text-xl font-semibold text-gray-800">{getDisplayName(user)}</h3>
                     <p className="text-sm text-gray-500 mt-1">{user.email}</p>
                   </div>
 
@@ -85,7 +100,7 @@ export default function ProfilePage() {
                     </svg>
                     <div className="flex-1">
                       <p className="text-sm font-medium text-gray-500">Tên hiển thị</p>
-                      <p className="text-base text-gray-800 mt-1">{user.username}</p>
+                      <p className="text-base text-gray-800 mt-1">{getDisplayName(user) || <span className="text-gray-400 italic">Chưa cập nhật</span>}</p>
                     </div>
                   </div>
 
@@ -158,7 +173,7 @@ export default function ProfilePage() {
                 {/* Action Buttons */}
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={() => alert('Chức năng chỉnh sửa hồ sơ đang được phát triển')}
+                    onClick={() => setIsEditModalOpen(true)}
                     className="flex-1 bg-[#45690b] text-white py-2 px-4 rounded-lg font-medium hover:bg-[#42612e] transition-colors"
                   >
                     Chỉnh sửa hồ sơ
@@ -175,6 +190,16 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Edit Profile Modal */}
+      {user && (
+        <EditProfileModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          user={user}
+          onSuccess={handleProfileUpdate}
+        />
+      )}
     </>
   );
 }
