@@ -2,18 +2,30 @@ import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth, facebookProvider, googleProvider } from "../../config/firebase";
+import { authService } from "../../services/authService";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic
-    console.log({ email, password, rememberMe });
+    setError("");
+    setLoading(true);
+
+    try {
+      await authService.login({ email, password });
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSocialLogin = async (provider: any) => {
@@ -142,12 +154,20 @@ export default function LoginForm() {
         </a>
       </div>
 
+      {/* Error Message */}
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+          {error}
+        </div>
+      )}
+
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors"
+        disabled={loading}
+        className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Đăng nhập
+        {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
       </button>
 
       {/* Divider */}

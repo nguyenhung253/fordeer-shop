@@ -1,7 +1,10 @@
+import { authService } from "@/services/authService";
 import { Link, useLocation } from "react-router-dom";
+import ProfileDropdown from "./profile-dropdown";
 
 export default function Header() {
   const location = useLocation();
+  const isAuthenticated = authService.isAuthenticated();
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -72,9 +75,15 @@ export default function Header() {
           <Link to="/cart" className="hover:opacity-80 transition-opacity">
             <img src="/cart.png" alt="Giỏ hàng" className="w-7 h-7" />
           </Link>
-          <Link to="/login" className="hover:opacity-80 transition-opacity">
-            <img src="/user.png" alt="Đăng nhập" className="w-7 h-7" />
-          </Link>
+
+          {/* Show Profile Dropdown if authenticated, otherwise show login link */}
+          {isAuthenticated ? (
+            <ProfileDropdown />
+          ) : (
+            <Link to="/login" className="hover:opacity-80 transition-opacity">
+              <img src="/user.png" alt="Đăng nhập" className="w-7 h-7" />
+            </Link>
+          )}
         </div>
       </div>
     </header>
