@@ -13,7 +13,7 @@ const initialCartItems: CartItem[] = [
   {
     id: 1,
     name: "Rừng Pạc Chai",
-    price: 95000,
+    price: 15000,
     quantity: 2,
     image: "/coffee.png",
   },

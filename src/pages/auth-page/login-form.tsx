@@ -1,15 +1,54 @@
+import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { auth, facebookProvider, googleProvider } from "../../config/firebase";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Handle login logic
     console.log({ email, password, rememberMe });
+  };
+
+  const handleSocialLogin = async (provider: any) => {
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      const idToken = await user.getIdToken();
+
+      // Gửi token xuống backend
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/customer/firebase`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Lưu token vào localStorage
+        localStorage.setItem('accessToken', data.accessToken);
+        localStorage.setItem('refreshToken', data.refreshToken);
+        localStorage.setItem('user', JSON.stringify(data.customer));
+
+        // Chuyển hướng về trang chủ
+        navigate('/');
+      } else {
+        console.error('Login failed:', data.message);
+        alert(data.message || 'Đăng nhập thất bại');
+      }
+    } catch (error) {
+      console.error('Social login error:', error);
+      alert('Có lỗi xảy ra khi đăng nhập');
+    }
   };
 
   return (
@@ -127,6 +166,7 @@ export default function LoginForm() {
       <div className="flex gap-4">
         <button
           type="button"
+          onClick={() => handleSocialLogin(googleProvider)}
           className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -151,6 +191,7 @@ export default function LoginForm() {
         </button>
         <button
           type="button"
+          onClick={() => handleSocialLogin(facebookProvider)}
           className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
         >
           <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
