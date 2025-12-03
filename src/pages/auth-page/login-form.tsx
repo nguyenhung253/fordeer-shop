@@ -1,6 +1,7 @@
 import { signInWithPopup } from "firebase/auth";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { auth, facebookProvider, googleProvider } from "../../config/firebase";
 import { authService } from "../../services/authService";
 
@@ -55,11 +56,11 @@ export default function LoginForm() {
         navigate('/');
       } else {
         console.error('Login failed:', data.message);
-        alert(data.message || 'Đăng nhập thất bại');
+        toast.error(data.message || 'Đăng nhập thất bại');
       }
     } catch (error) {
       console.error('Social login error:', error);
-      alert('Có lỗi xảy ra khi đăng nhập');
+      toast.error('Có lỗi xảy ra khi đăng nhập');
     }
   };
 
@@ -68,13 +69,13 @@ export default function LoginForm() {
       {/* Email */}
       <div>
         <label className="block text-[#45690b] font-bold text-[14px] mb-2">
-          Email / Số điện thoại
+          Email
         </label>
         <input
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Nhập email hoặc số điện thoại"
+          placeholder="Nhập email"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors"
           required
         />

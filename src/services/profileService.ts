@@ -41,6 +41,12 @@ export const profileService = {
     if (data.phone) {
       jsonData.phone = data.phone;
     }
+    if (data.currentPassword) {
+      jsonData.currentPassword = data.currentPassword;
+    }
+    if (data.newPassword) {
+      jsonData.newPassword = data.newPassword;
+    }
 
     const response = await fetch(`${API_URL}/api/auth/customer/profile`, {
       method: 'PUT',

@@ -32,6 +32,8 @@ export interface UpdateProfileRequest {
   username?: string;
   phone?: string;
   avatar?: File;
+  currentPassword?: string;
+  newPassword?: string;
 }
 
 export interface UpdateProfileResponse {

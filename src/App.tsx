@@ -1,4 +1,5 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
+import { Toaster } from "@/components/ui/sonner";
 import CartPage from "@/pages/cart-page";
 import HomePage from "@/pages/home-page";
 import RecruitmentPage from "@/pages/recruitment-page";
@@ -41,6 +42,7 @@ function App() {
           }
         />
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 }

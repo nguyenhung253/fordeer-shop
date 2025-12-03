@@ -1,13 +1,16 @@
+import ChangePasswordModal from '@/components/change-password-modal';
 import EditProfileModal from '@/components/edit-profile-modal';
 import Header from '@/components/header';
 import { authService } from '@/services/authService';
 import type { Customer } from '@/types/auth';
 import { getDisplayName, getInitial } from '@/utils/user';
 import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 
 export default function ProfilePage() {
   const [user, setUser] = useState<Customer | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false);
 
   useEffect(() => {
     const currentUser = authService.getCurrentUser();
@@ -179,7 +182,7 @@ export default function ProfilePage() {
                     Chỉnh sửa hồ sơ
                   </button>
                   <button
-                    onClick={() => alert('Chức năng đổi mật khẩu đang được phát triển')}
+                    onClick={() => setIsChangePasswordModalOpen(true)}
                     className="flex-1 bg-white text-[#45690b] py-2 px-4 rounded-lg font-medium border border-[#45690b] hover:bg-gray-50 transition-colors"
                   >
                     Đổi mật khẩu
@@ -200,6 +203,16 @@ export default function ProfilePage() {
           onSuccess={handleProfileUpdate}
         />
       )}
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+        onSuccess={() => {
+          toast.success('Đổi mật khẩu thành công! Vui lòng đăng nhập lại.');
+          setIsChangePasswordModalOpen(false);
+        }}
+      />
     </>
   );
 }
