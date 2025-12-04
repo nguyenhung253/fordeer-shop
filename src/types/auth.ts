@@ -40,3 +40,17 @@ export interface UpdateProfileResponse {
   message: string;
   customer: Customer;
 }
+
+export interface RegisterRequest {
+  fullName: string;
+  email: string;
+  phone: string;
+  password: string;
+}
+
+export interface RegisterResponse {
+  message: string;
+  customer: Customer;
+  accessToken: string;
+  refreshToken: string;
+}

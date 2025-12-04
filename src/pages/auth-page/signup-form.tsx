@@ -1,4 +1,7 @@
+import { authService } from "@/services/authService";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function SignupForm() {
   const [formData, setFormData] = useState({
@@ -12,14 +15,46 @@ export default function SignupForm() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeTerms, setAgreeTerms] = useState(false);
 
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle signup logic
-    console.log(formData);
+
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    if (!agreeTerms) {
+      toast.error('Vui lòng đồng ý với điều khoản dịch vụ');
+      return;
+    }
+
+    setLoading(true);
+    const loadingToast = toast.loading('Đang đăng ký tài khoản...');
+
+    try {
+      await authService.register({
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password,
+      });
+
+      toast.dismiss(loadingToast);
+      toast.success('Đăng ký thành công!');
+      navigate('/');
+    } catch (err: any) {
+      toast.dismiss(loadingToast);
+      toast.error(err.message || 'Đăng ký thất bại. Vui lòng thử lại.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -35,8 +70,9 @@ export default function SignupForm() {
           value={formData.fullName}
           onChange={handleChange}
           placeholder="Nhập họ và tên"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
+          disabled={loading}
         />
       </div>
 
@@ -51,8 +87,9 @@ export default function SignupForm() {
           value={formData.email}
           onChange={handleChange}
           placeholder="Nhập địa chỉ email"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
+          disabled={loading}
         />
       </div>
 
@@ -67,8 +104,9 @@ export default function SignupForm() {
           value={formData.phone}
           onChange={handleChange}
           placeholder="Nhập số điện thoại"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
+          disabled={loading}
         />
       </div>
 
@@ -84,9 +122,10 @@ export default function SignupForm() {
             value={formData.password}
             onChange={handleChange}
             placeholder="Nhập mật khẩu (ít nhất 8 ký tự)"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors pr-12"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed"
             required
             minLength={8}
+            disabled={loading}
           />
           <button
             type="button"
@@ -144,8 +183,9 @@ export default function SignupForm() {
             value={formData.confirmPassword}
             onChange={handleChange}
             placeholder="Nhập lại mật khẩu"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors pr-12"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed"
             required
+            disabled={loading}
           />
           <button
             type="button"
@@ -198,8 +238,9 @@ export default function SignupForm() {
             type="checkbox"
             checked={agreeTerms}
             onChange={(e) => setAgreeTerms(e.target.checked)}
-            className="w-4 h-4 mt-0.5 text-[#45690b] border-gray-300 rounded focus:ring-[#45690b]"
+            className="w-4 h-4 mt-0.5 text-[#45690b] border-gray-300 rounded focus:ring-[#45690b] disabled:cursor-not-allowed"
             required
+            disabled={loading}
           />
           <span className="text-[13px] text-gray-600">
             Tôi đồng ý với{" "}
@@ -218,9 +259,10 @@ export default function SignupForm() {
       {/* Submit Button */}
       <button
         type="submit"
-        className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors"
+        disabled={loading}
+        className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        Đăng ký
+        {loading ? 'Đang đăng ký...' : 'Đăng ký'}
       </button>
 
       {/* Benefits */}

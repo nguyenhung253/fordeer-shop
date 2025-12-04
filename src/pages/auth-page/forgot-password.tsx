@@ -3,24 +3,28 @@ import { authService } from '@/services/authService';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setLoading(true);
+
+    const loadingToast = toast.loading('Đang gửi mã OTP...');
 
     try {
       await authService.forgotPassword(email);
+      toast.dismiss(loadingToast);
+      toast.success('Mã OTP đã được gửi đến email của bạn!');
       // Navigate to reset password page with email
       navigate('/reset-password', { state: { email } });
     } catch (err: any) {
-      setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
+      toast.dismiss(loadingToast);
+      toast.error(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');
     } finally {
       setLoading(false);
     }
@@ -48,18 +52,15 @@ export default function ForgotPasswordPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
                   placeholder="name@example.com"
                   required
                   disabled={loading}
                 />
               </div>
 
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-                  {error}
-                </div>
-              )}
+
+
 
               <button
                 type="submit"

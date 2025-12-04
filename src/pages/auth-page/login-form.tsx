@@ -11,19 +11,23 @@ export default function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
     setLoading(true);
+
+    // Show loading toast for slow backend
+    const loadingToast = toast.loading('Đang kết nối với server...');
 
     try {
       await authService.login({ email, password });
+      toast.dismiss(loadingToast);
+      toast.success('Đăng nhập thành công!');
       navigate('/');
     } catch (err: any) {
-      setError(err.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+      toast.dismiss(loadingToast);
+      toast.error(err.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
     } finally {
       setLoading(false);
     }
@@ -76,8 +80,9 @@ export default function LoginForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Nhập email"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
+          disabled={loading}
         />
       </div>
 
@@ -92,8 +97,9 @@ export default function LoginForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Nhập mật khẩu"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors pr-12"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors pr-12 disabled:bg-gray-100 disabled:cursor-not-allowed"
             required
+            disabled={loading}
           />
           <button
             type="button"
@@ -155,12 +161,7 @@ export default function LoginForm() {
         </Link>
       </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
-          {error}
-        </div>
-      )}
+
 
       {/* Submit Button */}
       <button
@@ -188,7 +189,8 @@ export default function LoginForm() {
         <button
           type="button"
           onClick={() => handleSocialLogin(googleProvider)}
-          className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          disabled={loading}
+          className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" viewBox="0 0 24 24">
             <path
@@ -213,7 +215,8 @@ export default function LoginForm() {
         <button
           type="button"
           onClick={() => handleSocialLogin(facebookProvider)}
-          className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          disabled={loading}
+          className="flex-1 flex items-center justify-center gap-2 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <svg className="w-5 h-5" fill="#1877F2" viewBox="0 0 24 24">
             <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />

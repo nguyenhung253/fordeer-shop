@@ -3,6 +3,7 @@ import { authService } from '@/services/authService';
 import { CheckCircle2, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default function ResetPasswordPage() {
 
     try {
       await authService.resetPassword(email, otp, password);
-      alert('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.');
+      toast.success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.');
       navigate('/login');
     } catch (err: any) {
       setError(err.message || 'Có lỗi xảy ra. Vui lòng thử lại.');

@@ -61,10 +61,30 @@ export const profileService = {
 };
 
 async function handleResponse(response: Response): Promise<UpdateProfileResponse> {
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data.message || 'Cập nhật hồ sơ thất bại');
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    throw new Error('Lỗi khi xử lý phản hồi từ server');
   }
+  
+  if (!response.ok) {
+    // Translate common error messages to Vietnamese
+    let errorMessage = data.message || 'Cập nhật hồ sơ thất bại';
+    
+    if (errorMessage.toLowerCase().includes('current password is incorrect')) {
+      errorMessage = 'Mật khẩu hiện tại không đúng';
+    } else if (errorMessage.toLowerCase().includes('current password required')) {
+      errorMessage = 'Vui lòng nhập mật khẩu hiện tại';
+    } else if (errorMessage.toLowerCase().includes('password')) {
+      errorMessage = 'Lỗi liên quan đến mật khẩu: ' + data.message;
+    } else if (response.status === 500) {
+      errorMessage = 'Lỗi server. Vui lòng thử lại sau.';
+    }
+    
+    throw new Error(errorMessage);
+  }
+  
   authService.updateCurrentUser(data.customer);
   return data;
 }
