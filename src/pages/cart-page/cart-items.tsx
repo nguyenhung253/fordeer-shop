@@ -1,53 +1,44 @@
-import { useState } from "react";
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  image: string;
-  note?: string;
-}
-
-const initialCartItems: CartItem[] = [
-  {
-    id: 1,
-    name: "Rừng Pạc Chai",
-    price: 15000,
-    quantity: 2,
-    image: "/coffee.png",
-  },
-  {
-    id: 2,
-    name: "Rừng Amazon Chai",
-    price: 110000,
-    quantity: 1,
-    image: "/coffee.png",
-  },
-  {
-    id: 3,
-    name: "Cà Phê Kem Dừa",
-    price: 52000,
-    quantity: 1,
-    image: "/coffee.png",
-  },
-];
+import { cartService, type CartItem } from "@/services/cartService";
+import { useEffect, useState } from "react";
 
 export default function CartItems() {
-  const [cartItems, setCartItems] = useState<CartItem[]>(initialCartItems);
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
 
-  const updateQuantity = (id: number, delta: number) => {
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id
-          ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-          : item
-      )
+  useEffect(() => {
+    // Load cart from localStorage
+    setCartItems(cartService.getCart());
+
+    // Listen for cart updates
+    const handleCartUpdate = (e: CustomEvent<CartItem[]>) => {
+      setCartItems(e.detail);
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate as EventListener);
+    return () => {
+      window.removeEventListener(
+        "cartUpdated",
+        handleCartUpdate as EventListener
+      );
+    };
+  }, []);
+
+  const updateQuantity = (productId: number, delta: number, size?: string) => {
+    const item = cartItems.find(
+      (i) => i.productId === productId && i.size === size
     );
+    if (item) {
+      const newQuantity = Math.max(1, item.quantity + delta);
+      cartService.updateQuantity(productId, newQuantity, size);
+    }
   };
 
-  const removeItem = (id: number) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  const removeItem = (productId: number, size?: string) => {
+    cartService.removeFromCart(productId, size);
+  };
+
+  const updateNote = (productId: number, note: string, size?: string) => {
+    cartService.updateNote(productId, note, size);
+    setCartItems(cartService.getCart());
   };
 
   const formatPrice = (price: number) => {
@@ -100,9 +91,9 @@ export default function CartItems() {
       </div>
 
       {/* Items */}
-      {cartItems.map((item) => (
+      {cartItems.map((item, index) => (
         <div
-          key={item.id}
+          key={`${item.productId}-${item.size || ""}-${index}`}
           className="bg-white rounded-lg p-4 grid grid-cols-12 gap-4 items-center shadow-sm hover:shadow-md transition-shadow"
         >
           {/* Product Info */}
@@ -114,13 +105,20 @@ export default function CartItems() {
                 className="w-full h-full object-cover"
               />
             </div>
-            <div>
+            <div className="flex-1">
               <h4 className="font-bold text-[#45690b] text-[14px]">
                 {item.name}
               </h4>
+              {item.size && (
+                <p className="text-[12px] text-gray-500">Size: {item.size}</p>
+              )}
               <input
                 type="text"
                 placeholder="Ghi chú..."
+                value={item.note || ""}
+                onChange={(e) =>
+                  updateNote(item.productId, e.target.value, item.size)
+                }
                 className="mt-2 text-[12px] text-gray-500 border-b border-gray-200 focus:border-[#45690b] outline-none w-full"
               />
             </div>
@@ -135,7 +133,7 @@ export default function CartItems() {
           <div className="col-span-2 flex items-center justify-center">
             <div className="flex items-center border border-[#45690b] rounded-full">
               <button
-                onClick={() => updateQuantity(item.id, -1)}
+                onClick={() => updateQuantity(item.productId, -1, item.size)}
                 className="w-8 h-8 flex items-center justify-center text-[#45690b] hover:bg-[#d9ef7f] rounded-l-full transition-colors"
               >
                 −
@@ -144,7 +142,7 @@ export default function CartItems() {
                 {item.quantity}
               </span>
               <button
-                onClick={() => updateQuantity(item.id, 1)}
+                onClick={() => updateQuantity(item.productId, 1, item.size)}
                 className="w-8 h-8 flex items-center justify-center text-[#45690b] hover:bg-[#d9ef7f] rounded-r-full transition-colors"
               >
                 +
@@ -160,7 +158,7 @@ export default function CartItems() {
           {/* Remove */}
           <div className="col-span-1 text-center">
             <button
-              onClick={() => removeItem(item.id)}
+              onClick={() => removeItem(item.productId, item.size)}
               className="text-gray-400 hover:text-red-500 transition-colors"
             >
               <svg

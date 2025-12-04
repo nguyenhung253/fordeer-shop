@@ -18,16 +18,16 @@ export default function LoginForm() {
     setLoading(true);
 
     // Show loading toast for slow backend
-    const loadingToast = toast.loading('Đang kết nối với server...');
+    const loadingToast = toast.loading("Đang kết nối với server...");
 
     try {
       await authService.login({ email, password });
       toast.dismiss(loadingToast);
-      toast.success('Đăng nhập thành công!');
-      navigate('/');
+      toast.success("Đăng nhập thành công!");
+      navigate("/");
     } catch (err: any) {
       toast.dismiss(loadingToast);
-      toast.error(err.message || 'Đăng nhập thất bại. Vui lòng thử lại!');
+      toast.error(err.message || "Đăng nhập thất bại. Vui lòng thử lại!");
     } finally {
       setLoading(false);
     }
@@ -40,46 +40,49 @@ export default function LoginForm() {
       const idToken = await user.getIdToken();
 
       // Gửi token xuống backend
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/customer/firebase`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ idToken }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/customer/firebase`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ idToken }),
+        }
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         // Lưu token vào localStorage
-        localStorage.setItem('accessToken', data.accessToken);
-        localStorage.setItem('refreshToken', data.refreshToken);
-        localStorage.setItem('user', JSON.stringify(data.customer));
+        localStorage.setItem("accessToken", data.accessToken);
+        localStorage.setItem("refreshToken", data.refreshToken);
+        localStorage.setItem("user", JSON.stringify(data.customer));
 
         // Chuyển hướng về trang chủ
-        navigate('/');
+        navigate("/");
       } else {
-        console.error('Login failed:', data.message);
-        toast.error(data.message || 'Đăng nhập thất bại');
+        console.error("Login failed:", data.message);
+        toast.error(data.message || "Đăng nhập thất bại");
       }
     } catch (error) {
-      console.error('Social login error:', error);
-      toast.error('Có lỗi xảy ra khi đăng nhập');
+      console.error("Social login error:", error);
+      toast.error("Có lỗi xảy ra khi đăng nhập");
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Email */}
+      {/* Email or Phone */}
       <div>
         <label className="block text-[#45690b] font-bold text-[14px] mb-2">
-          Email
+          Email hoặc Số điện thoại
         </label>
         <input
           type="text"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Nhập email"
+          placeholder="Nhập email hoặc số điện thoại"
           className="w-full px-4 py-3 border border-gray-300 rounded-lg text-[14px] focus:border-[#45690b] focus:ring-1 focus:ring-[#45690b] outline-none transition-colors disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
           disabled={loading}
@@ -156,12 +159,13 @@ export default function LoginForm() {
           />
           <span className="text-[13px] text-gray-600">Ghi nhớ đăng nhập</span>
         </label>
-        <Link to="/forgot-password" className="text-[13px] text-[#45690b] hover:underline">
+        <Link
+          to="/forgot-password"
+          className="text-[13px] text-[#45690b] hover:underline"
+        >
           Quên mật khẩu?
         </Link>
       </div>
-
-
 
       {/* Submit Button */}
       <button
@@ -169,7 +173,7 @@ export default function LoginForm() {
         disabled={loading}
         className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {loading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
       </button>
 
       {/* Divider */}
