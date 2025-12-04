@@ -1,4 +1,5 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ScrollToTop from "@/components/scroll-to-top";
 import { Toaster } from "@/components/ui/sonner";
 import CartPage from "@/pages/cart-page";
 import HomePage from "@/pages/home-page";
@@ -13,6 +14,7 @@ import ProfilePage from "./pages/profile-page";
 function App() {
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/recruitment" element={<RecruitmentPage />} />

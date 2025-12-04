@@ -1,16 +1,67 @@
-import { useState } from "react";
+import { authService } from "@/services/authService";
+import { cartService, type CartItem } from "@/services/cartService";
+import { orderService } from "@/services/orderService";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function CartSummary() {
   const [promoCode, setPromoCode] = useState("");
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  // Mock data - in real app, this would come from cart state
-  const subtotal = 2000;
-  const shipping = 0;
-  const discount = 0;
+  useEffect(() => {
+    setCartItems(cartService.getCart());
+
+    const handleCartUpdate = (e: CustomEvent<CartItem[]>) => {
+      setCartItems(e.detail);
+    };
+
+    window.addEventListener("cartUpdated", handleCartUpdate as EventListener);
+    return () => {
+      window.removeEventListener(
+        "cartUpdated",
+        handleCartUpdate as EventListener
+      );
+    };
+  }, []);
+
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
+  const shipping = subtotal >= 200000 ? 0 : 30000;
+  const discount = 0; // TODO: implement promo code
   const total = subtotal - discount + shipping;
 
   const formatPrice = (price: number) => {
     return price.toLocaleString("vi-VN") + "đ";
+  };
+
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      toast.error("Giỏ hàng trống");
+      return;
+    }
+
+    if (!authService.isAuthenticated()) {
+      toast.error("Vui lòng đăng nhập để đặt hàng");
+      navigate("/login");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const order = await orderService.createOrder(cartItems, discount);
+      cartService.clearCart();
+      toast.success(`Đặt hàng thành công! Mã đơn: ${order.orderCode}`);
+      navigate("/orders");
+    } catch (error: any) {
+      toast.error(error.message || "Đặt hàng thất bại");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,7 +98,9 @@ export default function CartSummary() {
         {/* Price Breakdown */}
         <div className="space-y-3">
           <div className="flex justify-between text-[14px]">
-            <span className="text-gray-600">Tạm tính</span>
+            <span className="text-gray-600">
+              Tạm tính ({cartItems.length} sản phẩm)
+            </span>
             <span className="text-[#1d4220]">{formatPrice(subtotal)}</span>
           </div>
           <div className="flex justify-between text-[14px]">
@@ -78,8 +131,12 @@ export default function CartSummary() {
         </div>
 
         {/* Checkout Button */}
-        <button className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors">
-          Tiến hành thanh toán
+        <button
+          onClick={handleCheckout}
+          disabled={loading || cartItems.length === 0}
+          className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? "Đang xử lý..." : "Tiến hành thanh toán"}
         </button>
 
         {/* Payment Methods */}

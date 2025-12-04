@@ -1,11 +1,15 @@
 import { authService } from "@/services/authService";
+import { cartService } from "@/services/cartService";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import ProfileDropdown from "./profile-dropdown";
 
 export default function Header() {
   const location = useLocation();
-  const [isAuthenticated, setIsAuthenticated] = useState(authService.isAuthenticated());
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    authService.isAuthenticated()
+  );
+  const [cartCount, setCartCount] = useState(cartService.getItemCount());
 
   useEffect(() => {
     // Listen for user updates to refresh auth state
@@ -13,10 +17,17 @@ export default function Header() {
       setIsAuthenticated(authService.isAuthenticated());
     };
 
-    window.addEventListener('userUpdated', handleUserUpdate);
+    // Listen for cart updates
+    const handleCartUpdate = () => {
+      setCartCount(cartService.getItemCount());
+    };
+
+    window.addEventListener("userUpdated", handleUserUpdate);
+    window.addEventListener("cartUpdated", handleCartUpdate);
 
     return () => {
-      window.removeEventListener('userUpdated', handleUserUpdate);
+      window.removeEventListener("userUpdated", handleUserUpdate);
+      window.removeEventListener("cartUpdated", handleCartUpdate);
     };
   }, []);
 
@@ -86,8 +97,16 @@ export default function Header() {
 
         {/* Actions */}
         <div className="flex items-center gap-4">
-          <Link to="/cart" className="hover:opacity-80 transition-opacity">
+          <Link
+            to="/cart"
+            className="hover:opacity-80 transition-opacity relative"
+          >
             <img src="/cart.png" alt="Giỏ hàng" className="w-7 h-7" />
+            {cartCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#ff6b35] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
+            )}
           </Link>
 
           {/* Show Profile Dropdown if authenticated, otherwise show login link */}

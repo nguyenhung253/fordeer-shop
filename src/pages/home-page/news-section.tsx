@@ -1,3 +1,5 @@
+import { useScrollAnimation } from "@/hooks/use-scroll-animation";
+
 const newsItems = [
   {
     title: "MÙA YÊU THƯƠNG - CÂY NỘI THẤT, SEN ĐÁ ĐỒNG GIÁ TỪ 9K",
@@ -38,41 +40,64 @@ const newsItems = [
 ];
 
 export default function NewsSection() {
+  const { ref: titleRef, isVisible: titleVisible } = useScrollAnimation(0.2);
+  const { ref: gridRef, isVisible: gridVisible } = useScrollAnimation(0.1);
+
   return (
-    <section className="py-16 bg-[#fcfcf6]">
+    <section className="py-16 bg-[#fcfcf6] overflow-hidden">
       <div className="max-w-[1152px] mx-auto px-4">
         {/* Section Title */}
-        <div className="flex items-center justify-center gap-4 mb-12">
-          <div className="h-px bg-[#45690b] flex-1 max-w-[347px]"></div>
+        <div
+          ref={titleRef}
+          className={`flex items-center justify-center gap-4 mb-12 transition-all duration-700 ${
+            titleVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-10"
+          }`}
+        >
+          <div
+            className={`h-px bg-[#45690b] flex-1 max-w-[347px] transition-all duration-1000 delay-300 ${
+              titleVisible ? "scale-x-100" : "scale-x-0"
+            } origin-right`}
+          />
           <h2 className="text-[26px] font-bold text-[#45690b] text-center uppercase">
             Tin tức
           </h2>
-          <div className="h-px bg-[#45690b] flex-1 max-w-[347px]"></div>
+          <div
+            className={`h-px bg-[#45690b] flex-1 max-w-[347px] transition-all duration-1000 delay-300 ${
+              titleVisible ? "scale-x-100" : "scale-x-0"
+            } origin-left`}
+          />
         </div>
 
         {/* News Grid */}
-        <div className="grid grid-cols-3 gap-6 mb-8">
+        <div ref={gridRef} className="grid grid-cols-3 gap-6 mb-8">
           {newsItems.map((item, index) => (
             <div
               key={index}
-              className="bg-[#fcfcfc] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer"
+              className={`bg-[#fcfcfc] overflow-hidden shadow-md hover:shadow-xl hover:-translate-y-2 transition-all duration-500 cursor-pointer group ${
+                gridVisible
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-10"
+              }`}
+              style={{ transitionDelay: `${index * 100}ms` }}
             >
               <div className="h-[240px] overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
               <div className="p-4 space-y-3">
-                <h3 className="font-bold text-[#45690b] text-[13px] leading-[17.81px]">
+                <h3 className="font-bold text-[#45690b] text-[13px] leading-[17.81px] group-hover:text-[#799a01] transition-colors duration-300">
                   {item.title}
                 </h3>
                 <p className="text-[13px] text-[#45690b] leading-[17.81px]">
                   {item.description}
                 </p>
                 <div className="flex justify-end">
-                  <button className="bg-[#799a01] hover:bg-[#45690b] text-white text-[13px] px-6 py-1.5 rounded-[23px] font-bold transition-colors leading-[14.17px]">
+                  <button className="bg-[#799a01] hover:bg-[#45690b] text-white text-[13px] px-6 py-1.5 rounded-[23px] font-bold transition-all duration-300 leading-[14.17px] hover:scale-105 hover:shadow-md">
                     ĐỌC TIẾP
                   </button>
                 </div>
@@ -83,8 +108,12 @@ export default function NewsSection() {
 
         {/* View All Link */}
         <div className="text-center">
-          <a href="#" className="text-[#799a01] text-[16px] hover:underline">
+          <a
+            href="#"
+            className="text-[#799a01] text-[16px] hover:text-[#45690b] transition-colors duration-300 relative group"
+          >
             Xem tất cả
+            <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#45690b] group-hover:w-full transition-all duration-300" />
           </a>
         </div>
       </div>
