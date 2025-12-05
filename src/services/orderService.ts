@@ -25,7 +25,7 @@ export interface Order {
     id: number;
     productId: number;
     quantity: number;
-    unitPrice: string;
+    price: string;
     product?: {
       productName: string;
       productUrl?: string;
@@ -94,13 +94,18 @@ export const orderService = {
       }
     );
 
-    const data = await response.json();
+    const responseData = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.message || "Không thể tải đơn hàng");
+      throw new Error(responseData.message || "Không thể tải đơn hàng");
     }
 
-    return data;
+    // Backend returns { data: [...], pagination: {...} }
+    // Transform to { orders: [...], pagination: {...} }
+    return {
+      orders: responseData.data || [],
+      pagination: responseData.pagination,
+    };
   },
 
   /**

@@ -197,7 +197,7 @@ export default function OrdersPage() {
                                 `Sản phẩm #${item.productId}`}
                             </h4>
                             <p className="text-[13px] text-gray-500">
-                              x{item.quantity} · {formatPrice(item.unitPrice)}
+                              x{item.quantity} · {formatPrice(item.price)}
                             </p>
                           </div>
                         </div>

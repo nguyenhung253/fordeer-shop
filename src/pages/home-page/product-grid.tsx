@@ -44,86 +44,6 @@ const mapApiProduct = (apiProduct: ApiProduct): Product => ({
   ],
 });
 
-// Fallback mock data when API fails
-const mockProducts: Product[] = [
-  {
-    id: 1,
-    name: "A-Mê Tuyết Quất",
-    category: "Cà phê",
-    price: "59.000đ",
-    priceNumber: 59000,
-    image: "/caphe.png",
-    description: "Đá tuyết Quất thơm mát, kết hợp cùng Americano đắng nhẹ",
-    sizes: [
-      { label: "Nhỏ", price: "0đ", priceNumber: 0 },
-      { label: "Vừa", price: "+6.000đ", priceNumber: 6000 },
-      { label: "Lớn", price: "+10.000đ", priceNumber: 10000 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Capuchino Nóng",
-    category: "Cà phê",
-    price: "95.000đ",
-    priceNumber: 95000,
-    image: "/caphe2.png",
-    description: "Cà phê Espresso đậm đà kết hợp với sữa tươi béo ngậy",
-    sizes: [
-      { label: "Nhỏ", price: "0đ", priceNumber: 0 },
-      { label: "Vừa", price: "+6.000đ", priceNumber: 6000 },
-      { label: "Lớn", price: "+10.000đ", priceNumber: 10000 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Đen Đá",
-    category: "Cà phê",
-    price: "95.000đ",
-    priceNumber: 95000,
-    image: "/caphe3.png",
-  },
-  {
-    id: 4,
-    name: "Không Đường",
-    category: "Cà phê",
-    price: "110.000đ",
-    priceNumber: 110000,
-    image: "/caphe4.png",
-  },
-  {
-    id: 5,
-    name: "Cà Phê Kem Dừa",
-    category: "Cà phê",
-    price: "52.000đ",
-    priceNumber: 52000,
-    image: "/caphe5.png",
-  },
-  {
-    id: 6,
-    name: "Bạc Sỉu",
-    category: "Cà phê",
-    price: "42.000đ",
-    priceNumber: 42000,
-    image: "/caphe6.png",
-  },
-  {
-    id: 7,
-    name: "Trà Đào Cam Sả",
-    category: "Trà",
-    price: "45.000đ",
-    priceNumber: 45000,
-    image: "/caphe2.png",
-  },
-  {
-    id: 8,
-    name: "Trà Sen Vàng",
-    category: "Trà",
-    price: "48.000đ",
-    priceNumber: 48000,
-    image: "/caphe4.png",
-  },
-];
-
 // Build categories from product list with fixed category order
 const buildCategories = (productList: Product[]) => {
   const categoryMap = new Map<string, number>();
@@ -137,17 +57,18 @@ const buildCategories = (productList: Product[]) => {
   }));
 };
 
-// Initial categories from mock data
-const initialCategories = buildCategories(mockProducts);
+// Initial empty categories
+const initialCategories = FIXED_CATEGORIES.map((label) => ({
+  label,
+  count: 0,
+}));
 
 export default function ProductGrid() {
-  const [products, setProducts] = useState<Product[]>(mockProducts);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] =
     useState<{ label: string; count: number }[]>(initialCategories);
-  const [activeCategory, setActiveCategory] = useState(
-    initialCategories[0]?.label || "Cà phê"
-  );
-  const [isLoading] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("Cà phê");
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -160,31 +81,26 @@ export default function ProductGrid() {
 
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.2);
 
-  // Try to fetch from API on mount (mock data is already set as initial state)
+  // Fetch products from API on mount
   useEffect(() => {
     let isMounted = true;
 
     const fetchProducts = async () => {
+      setIsLoading(true);
       try {
         const response = await productService.getProducts();
-        // Only update if component is still mounted and we got actual products
-        if (
-          isMounted &&
-          response?.data &&
-          Array.isArray(response.data) &&
-          response.data.length > 0
-        ) {
+        if (isMounted && response?.data && Array.isArray(response.data)) {
           const mappedProducts = response.data.map(mapApiProduct);
           const cats = buildCategories(mappedProducts);
           setProducts(mappedProducts);
           setCategories(cats);
-          if (cats.length > 0) {
-            setActiveCategory(cats[0].label);
-          }
         }
-      } catch {
-        // Silently fail - we already have mock data as initial state
-        console.log("Using mock data (API unavailable)");
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     };
 

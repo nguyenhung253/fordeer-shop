@@ -1,11 +1,28 @@
 import Header from "@/components/header";
 import Footer from "@/components/footer";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import LoginForm from "./login-form";
 import SignupForm from "./signup-form";
 
 export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Handle logout redirect from management site
+  useEffect(() => {
+    const action = searchParams.get("action");
+    if (action === "logout") {
+      // Clear any existing session on shop site
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("refreshToken");
+      localStorage.removeItem("user");
+      // Clean URL
+      setSearchParams({});
+      // Force reload to update header
+      window.location.reload();
+    }
+  }, [searchParams, setSearchParams]);
 
   return (
     <div className="min-h-screen bg-white">
