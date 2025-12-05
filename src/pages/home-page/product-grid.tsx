@@ -165,7 +165,7 @@ export default function ProductGrid() {
   }, [isDragging, isAutoSliding, smoothScrollTo]);
 
   useEffect(() => {
-    const interval = setInterval(autoSlide, 4000); // Slide every 4 seconds
+    const interval = setInterval(autoSlide, 3000); // Slide every 3 seconds
     return () => clearInterval(interval);
   }, [autoSlide]);
 

@@ -1,9 +1,9 @@
 import type {
-    Customer,
-    LoginRequest,
-    LoginResponse,
-    RegisterRequest,
-    RegisterResponse,
+  Customer,
+  LoginRequest,
+  LoginResponse,
+  RegisterRequest,
+  RegisterResponse,
 } from "@/types/auth";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -14,9 +14,11 @@ export const authService = {
    */
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
     // Backend expects 'email' or 'phone' field
-    const isEmail = credentials.email.includes('@');
+    const isEmail = credentials.email.includes("@");
     const payload = {
-      ...(isEmail ? { email: credentials.email } : { phone: credentials.email }),
+      ...(isEmail
+        ? { email: credentials.email }
+        : { phone: credentials.email }),
       password: credentials.password,
     };
 
