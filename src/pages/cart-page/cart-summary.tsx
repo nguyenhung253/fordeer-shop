@@ -29,9 +29,8 @@ export default function CartSummary() {
     (sum, item) => sum + item.price * item.quantity,
     0
   );
-  const shipping = subtotal >= 200000 ? 0 : 30000;
   const discount = 0; // TODO: implement promo code
-  const total = subtotal - discount + shipping;
+  const total = subtotal - discount;
 
   const formatPrice = (price: number) => {
     return price.toLocaleString("vi-VN") + "đ";
@@ -91,18 +90,15 @@ export default function CartSummary() {
             </span>
             <span className="text-[#1d4220]">{formatPrice(subtotal)}</span>
           </div>
-          <div className="flex justify-between text-[14px]">
-            <span className="text-gray-600">Phí vận chuyển</span>
-            <span className="text-[#1d4220]">
-              {shipping === 0 ? "Miễn phí" : formatPrice(shipping)}
-            </span>
-          </div>
           {discount > 0 && (
             <div className="flex justify-between text-[14px]">
               <span className="text-gray-600">Giảm giá</span>
               <span className="text-red-500">-{formatPrice(discount)}</span>
             </div>
           )}
+          <p className="text-[12px] text-gray-500 italic">
+            * Phí vận chuyển sẽ được tính ở bước thanh toán
+          </p>
         </div>
 
         {/* Divider */}

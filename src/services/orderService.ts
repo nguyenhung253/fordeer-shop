@@ -21,14 +21,14 @@ export interface Order {
   discount: string;
   status: "pending" | "processing" | "completed" | "cancelled";
   createdAt: string;
-  items: {
+  items?: {
     id: number;
     productId: number;
     quantity: number;
     unitPrice: string;
     product?: {
       productName: string;
-      imageUrl: string;
+      productUrl?: string;
     };
   }[];
 }

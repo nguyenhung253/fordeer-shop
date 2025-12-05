@@ -6,6 +6,7 @@ import CheckoutPage from "@/pages/checkout-page";
 import OrderSuccessPage from "@/pages/checkout-page/order-success";
 import VNPayReturnPage from "@/pages/checkout-page/vnpay-return";
 import HomePage from "@/pages/home-page";
+import OrdersPage from "@/pages/orders-page";
 import RecruitmentPage from "@/pages/recruitment-page";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import AuthPage from "./pages/auth-page";
@@ -52,7 +53,7 @@ function App() {
           path="/orders"
           element={
             <ProtectedRoute>
-              <div>Đơn hàng của tôi - Coming soon</div>
+              <OrdersPage />
             </ProtectedRoute>
           }
         />
