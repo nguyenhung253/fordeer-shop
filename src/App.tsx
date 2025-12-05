@@ -2,6 +2,9 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import ScrollToTop from "@/components/scroll-to-top";
 import { Toaster } from "@/components/ui/sonner";
 import CartPage from "@/pages/cart-page";
+import CheckoutPage from "@/pages/checkout-page";
+import OrderSuccessPage from "@/pages/checkout-page/order-success";
+import VNPayReturnPage from "@/pages/checkout-page/vnpay-return";
 import HomePage from "@/pages/home-page";
 import RecruitmentPage from "@/pages/recruitment-page";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -23,6 +26,16 @@ function App() {
         <Route path="/stores" element={<div>Cửa hàng - Coming soon</div>} />
         <Route path="/about" element={<div>About us - Coming soon</div>} />
         <Route path="/cart" element={<CartPage />} />
+        <Route
+          path="/checkout"
+          element={
+            <ProtectedRoute>
+              <CheckoutPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/order-success" element={<OrderSuccessPage />} />
+        <Route path="/payment/vnpay-return" element={<VNPayReturnPage />} />
         <Route path="/login" element={<AuthPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />

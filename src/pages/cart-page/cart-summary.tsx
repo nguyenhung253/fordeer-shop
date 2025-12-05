@@ -1,6 +1,5 @@
 import { authService } from "@/services/authService";
 import { cartService, type CartItem } from "@/services/cartService";
-import { orderService } from "@/services/orderService";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -8,7 +7,6 @@ import { toast } from "sonner";
 export default function CartSummary() {
   const [promoCode, setPromoCode] = useState("");
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -39,7 +37,7 @@ export default function CartSummary() {
     return price.toLocaleString("vi-VN") + "đ";
   };
 
-  const handleCheckout = async () => {
+  const handleCheckout = () => {
     if (cartItems.length === 0) {
       toast.error("Giỏ hàng trống");
       return;
@@ -51,17 +49,7 @@ export default function CartSummary() {
       return;
     }
 
-    setLoading(true);
-    try {
-      const order = await orderService.createOrder(cartItems, discount);
-      cartService.clearCart();
-      toast.success(`Đặt hàng thành công! Mã đơn: ${order.orderCode}`);
-      navigate("/orders");
-    } catch (error: any) {
-      toast.error(error.message || "Đặt hàng thất bại");
-    } finally {
-      setLoading(false);
-    }
+    navigate("/checkout");
   };
 
   return (
@@ -133,10 +121,10 @@ export default function CartSummary() {
         {/* Checkout Button */}
         <button
           onClick={handleCheckout}
-          disabled={loading || cartItems.length === 0}
+          disabled={cartItems.length === 0}
           className="w-full bg-[#45690b] text-white py-4 rounded-full font-bold text-[16px] hover:bg-[#42612e] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? "Đang xử lý..." : "Tiến hành thanh toán"}
+          Tiến hành thanh toán
         </button>
 
         {/* Payment Methods */}
