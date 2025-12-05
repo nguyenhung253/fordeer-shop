@@ -11,32 +11,62 @@ const API_URL = import.meta.env.VITE_API_URL;
 export const authService = {
   /**
    * Login with email and password
+   * Tries customer login first, then admin/staff login if customer fails
    */
   login: async (credentials: LoginRequest): Promise<LoginResponse> => {
-    // Backend expects 'email' or 'phone' field
+    // Try customer login first
     const isEmail = credentials.email.includes("@");
-    const payload = {
+    const customerPayload = {
       ...(isEmail
         ? { email: credentials.email }
         : { phone: credentials.email }),
       password: credentials.password,
     };
 
-    const response = await fetch(`${API_URL}/api/auth/customer/login`, {
+    const customerResponse = await fetch(`${API_URL}/api/auth/customer/login`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(customerPayload),
     });
 
-    const data = await response.json();
+    if (customerResponse.ok) {
+      const data = await customerResponse.json();
+      // Save tokens and user to localStorage
+      localStorage.setItem("accessToken", data.accessToken);
+      localStorage.setItem("refreshToken", data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(data.customer));
 
-    if (!response.ok) {
-      console.error("Login error details:", data); // Log detailed error
+      // Sync cart after login
+      import("./cartService").then(({ cartService }) => {
+        cartService.onLogin();
+      });
+
+      return data;
+    }
+
+    // If customer login fails, try admin/staff login
+    const staffPayload = {
+      email: credentials.email,
+      password: credentials.password,
+    };
+
+    const staffResponse = await fetch(`${API_URL}/api/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(staffPayload),
+    });
+
+    const staffData = await staffResponse.json();
+
+    if (!staffResponse.ok) {
+      console.error("Login error details:", staffData);
 
       // Translate common error messages to Vietnamese
-      let errorMessage = data.message || "Đăng nhập thất bại";
+      let errorMessage = staffData.message || "Đăng nhập thất bại";
 
       if (errorMessage.toLowerCase().includes("invalid credentials")) {
         errorMessage = "Tài khoản hoặc mật khẩu không đúng";
@@ -51,17 +81,20 @@ export const authService = {
       throw new Error(errorMessage);
     }
 
-    // Save tokens and user to localStorage
-    localStorage.setItem("accessToken", data.accessToken);
-    localStorage.setItem("refreshToken", data.refreshToken);
-    localStorage.setItem("user", JSON.stringify(data.customer));
+    // Staff/Admin login successful - format response to match LoginResponse
+    // Staff login returns { user: { ... } } instead of { customer: { ... } }
+    const user = staffData.user;
+    localStorage.setItem("accessToken", user.accessToken);
+    localStorage.setItem("refreshToken", user.refreshToken || "");
+    localStorage.setItem("user", JSON.stringify(user));
 
-    // Sync cart after login (import dynamically to avoid circular dependency)
-    import("./cartService").then(({ cartService }) => {
-      cartService.onLogin();
-    });
-
-    return data;
+    // Return in LoginResponse format
+    return {
+      message: staffData.message || "Login successful",
+      customer: user, // Use user as customer for compatibility
+      accessToken: user.accessToken,
+      refreshToken: user.refreshToken || "",
+    };
   },
 
   /**
