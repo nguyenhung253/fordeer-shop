@@ -170,7 +170,6 @@ export default function ProductGrid() {
     // Resume auto-slide after 5 seconds of no interaction
     setTimeout(() => setIsAutoSliding(true), 5000);
   };
-  const { ref: tabsRef, isVisible: tabsVisible } = useScrollAnimation(0.2);
 
   const filteredProducts = products.filter(
     (p) => p.category === activeCategory
@@ -287,12 +286,7 @@ export default function ProductGrid() {
           </div>
         ) : categories.length > 0 ? (
           <div
-            ref={tabsRef}
-            className={`flex items-center justify-center gap-3 sm:gap-4 md:gap-10 border-b-[3px] border-[#d9ef7f] mb-6 md:mb-8 mt-4 md:mt-17 overflow-x-auto pb-0 transition-all duration-700 ${
-              tabsVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 translate-y-5"
-            }`}
+            className="flex items-center justify-center gap-3 sm:gap-4 md:gap-10 border-b-[3px] border-[#d9ef7f] mb-6 md:mb-8 mt-4 md:mt-17 overflow-x-auto pb-0"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             {categories.map((cat, index) => (
