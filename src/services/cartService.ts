@@ -270,7 +270,12 @@ export const cartService = {
    * Called when user logs in - sync carts
    */
   onLogin: async (): Promise<void> => {
-    await cartService.loadFromServer();
+    try {
+      await cartService.loadFromServer();
+    } catch (error) {
+      console.error("Failed to sync cart on login:", error);
+      // Don't throw - cart sync failure shouldn't block login
+    }
   },
 
   /**
