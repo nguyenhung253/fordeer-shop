@@ -1,15 +1,11 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useScrollAnimation } from "@/hooks/use-scroll-animation";
 import { cartService } from "@/services/cartService";
+import {
+  productService,
+  type Product as ApiProduct,
+} from "@/services/productService";
 import { toast } from "sonner";
-
-const categories = [
-  { label: "Cà phê", count: 10 },
-  { label: "Trà", count: 4 },
-  { label: "Nước ép", count: 8 },
-  { label: "Latte", count: 6 },
-  { label: "Trà sữa", count: 5 },
-];
 
 interface Product {
   id: number;
@@ -22,88 +18,34 @@ interface Product {
   sizes?: { label: string; price: string; priceNumber: number }[];
 }
 
-const products: Product[] = [
-  {
-    id: 1,
-    name: "A-Mê Tuyết Quất",
-    category: "Cà phê",
-    price: "59.000đ",
-    priceNumber: 59000,
-    image: "/caphe.png",
-    description:
-      "Đá tuyết Quất thơm mát, kết hợp cùng Americano đắng nhẹ. Uống là mê! *Khuấy đều để thưởng thức trọn vị",
-    sizes: [
-      { label: "Nhỏ", price: "0đ", priceNumber: 0 },
-      { label: "Vừa", price: "+6.000đ", priceNumber: 6000 },
-      { label: "Lớn", price: "+10.000đ", priceNumber: 10000 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Capuchino Nóng",
-    category: "Cà phê",
-    price: "95.000đ",
-    priceNumber: 95000,
-    image: "/caphe2.png",
-    description: "Cà phê Espresso đậm đà kết hợp với sữa tươi béo ngậy",
-    sizes: [
-      { label: "Nhỏ", price: "0đ", priceNumber: 0 },
-      { label: "Vừa", price: "+6.000đ", priceNumber: 6000 },
-      { label: "Lớn", price: "+10.000đ", priceNumber: 10000 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Đen Đá",
-    category: "Cà phê",
-    price: "95.000đ",
-    priceNumber: 95000,
-    image: "/caphe3.png",
-  },
-  {
-    id: 4,
-    name: "Không Đường",
-    category: "Cà phê",
-    price: "110.000đ",
-    priceNumber: 110000,
-    image: "/caphe4.png",
-  },
-  {
-    id: 5,
-    name: "Cà Phê Kem Dừa",
-    category: "Cà phê",
-    price: "52.000đ",
-    priceNumber: 52000,
-    image: "/caphe5.png",
-  },
-  {
-    id: 6,
-    name: "Bạc Sỉu",
-    category: "Cà phê",
-    price: "42.000đ",
-    priceNumber: 42000,
-    image: "/caphe6.png",
-  },
-  {
-    id: 7,
-    name: "Trà Đào Cam Sả",
-    category: "Trà",
-    price: "45.000đ",
-    priceNumber: 45000,
-    image: "/caphe2.png",
-  },
-  {
-    id: 8,
-    name: "Trà Sen Vàng",
-    category: "Trà",
-    price: "48.000đ",
-    priceNumber: 48000,
-    image: "/caphe4.png",
-  },
-];
+// Format price to Vietnamese currency
+const formatPrice = (price: number): string => {
+  return price.toLocaleString("vi-VN") + "đ";
+};
+
+// Map API product to component product format
+const mapApiProduct = (apiProduct: ApiProduct): Product => ({
+  id: apiProduct.id,
+  name: apiProduct.productName,
+  category: apiProduct.category || "Khác",
+  price: formatPrice(apiProduct.price),
+  priceNumber: apiProduct.price,
+  image: apiProduct.productUrl || "/caphe.png",
+  description: apiProduct.description,
+  sizes: [
+    { label: "Nhỏ", price: "0đ", priceNumber: 0 },
+    { label: "Vừa", price: "+6.000đ", priceNumber: 6000 },
+    { label: "Lớn", price: "+10.000đ", priceNumber: 10000 },
+  ],
+});
 
 export default function ProductGrid() {
-  const [activeCategory, setActiveCategory] = useState("Cà phê");
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<
+    { label: string; count: number }[]
+  >([]);
+  const [activeCategory, setActiveCategory] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -115,6 +57,43 @@ export default function ProductGrid() {
   const [isAutoSliding, setIsAutoSliding] = useState(true);
 
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation(0.2);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        const response = await productService.getProducts();
+        const mappedProducts = response.data.map(mapApiProduct);
+        setProducts(mappedProducts);
+
+        // Build categories from products
+        const categoryMap = new Map<string, number>();
+        mappedProducts.forEach((p) => {
+          categoryMap.set(p.category, (categoryMap.get(p.category) || 0) + 1);
+        });
+        const cats = Array.from(categoryMap.entries()).map(
+          ([label, count]) => ({
+            label,
+            count,
+          })
+        );
+        setCategories(cats);
+
+        // Set first category as active
+        if (cats.length > 0 && !activeCategory) {
+          setActiveCategory(cats[0].label);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+        toast.error("Không thể tải sản phẩm");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Smooth scroll animation using requestAnimationFrame
   const smoothScrollTo = useCallback(
@@ -271,152 +250,179 @@ export default function ProductGrid() {
         </div>
 
         {/* Category Tabs - Centered and scrollable on mobile */}
-        <div
-          ref={tabsRef}
-          className={`flex items-center justify-center gap-3 sm:gap-4 md:gap-10 border-b-[3px] border-[#d9ef7f] mb-6 md:mb-8 mt-4 md:mt-17 overflow-x-auto pb-0 transition-all duration-700 ${
-            tabsVisible
-              ? "opacity-100 translate-y-0"
-              : "opacity-0 translate-y-5"
-          }`}
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {categories.map((cat, index) => (
-            <button
-              key={cat.label}
-              onClick={() => setActiveCategory(cat.label)}
-              className={`relative pb-3 md:pb-4 whitespace-nowrap transition-all duration-300 hover:scale-105 flex-shrink-0 ${
-                activeCategory === cat.label
-                  ? "text-[#45690b]"
-                  : "text-gray-400 hover:text-[#799a01]"
-              }`}
-              style={{ transitionDelay: `${index * 100}ms` }}
-            >
-              <span className="text-[14px] md:text-[20px] font-bold uppercase tracking-wide">
-                {cat.label}
-              </span>
-              <sup className="ml-1 text-[10px] md:text-[12px] font-normal">
-                {cat.count}
-              </sup>
-              {activeCategory === cat.label && (
-                <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#45690b] translate-y-[1.5px] animate-pulse" />
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Products Carousel */}
-        <div ref={productsRef} className="relative flex items-center">
-          <button
-            onClick={() => scroll("left")}
-            className="hidden md:flex flex-shrink-0 w-10 h-10 bg-[#d9ef7f] rounded-full items-center justify-center hover:bg-[#c5e060] hover:scale-110 transition-all duration-300 shadow-md"
-          >
-            <svg
-              className="w-5 h-5 text-[#45690b]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 19l-7-7 7-7"
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-4 mb-6 md:mb-8 mt-4 md:mt-17">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="h-8 w-20 bg-gray-200 rounded animate-pulse"
               />
-            </svg>
-          </button>
-
+            ))}
+          </div>
+        ) : categories.length > 0 ? (
           <div
-            ref={scrollRef}
-            className={`flex-1 overflow-x-auto mx-0 md:mx-4 ${
-              isDragging ? "cursor-grabbing" : "cursor-grab"
+            ref={tabsRef}
+            className={`flex items-center justify-center gap-3 sm:gap-4 md:gap-10 border-b-[3px] border-[#d9ef7f] mb-6 md:mb-8 mt-4 md:mt-17 overflow-x-auto pb-0 transition-all duration-700 ${
+              tabsVisible
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-5"
             }`}
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-            onMouseDown={(e) => {
-              handleMouseDown(e);
-              handleInteractionStart();
-            }}
-            onMouseMove={handleMouseMove}
-            onMouseUp={() => {
-              handleMouseUp();
-              handleInteractionEnd();
-            }}
-            onMouseLeave={() => {
-              handleMouseLeave();
-              handleInteractionEnd();
-            }}
-            onMouseEnter={handleInteractionStart}
-            onTouchStart={(e) => {
-              handleTouchStart(e);
-              handleInteractionStart();
-            }}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={() => {
-              handleTouchEnd();
-              handleInteractionEnd();
-            }}
           >
-            <div
-              className="flex gap-4 md:gap-6"
-              style={{ width: "max-content" }}
-            >
-              {filteredProducts.map((product, index) => (
-                <div
-                  key={index}
-                  className={`w-[160px] md:w-[240px] group cursor-pointer transition-all duration-500 ${
-                    productsVisible
-                      ? "opacity-100 translate-y-0"
-                      : "opacity-0 translate-y-10"
-                  }`}
-                  style={{ transitionDelay: `${index * 100}ms` }}
-                  onClick={() => {
-                    if (!isDragging) {
-                      setSelectedProduct(product);
-                      setSelectedSize(0);
-                    }
-                  }}
-                >
-                  <div className="relative h-[180px] md:h-[260px] flex items-center justify-center mb-3 md:mb-4 group-hover:-translate-y-2 transition-transform duration-300">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="h-full w-auto object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-lg group-hover:drop-shadow-2xl"
-                    />
-                  </div>
-                  <div className="text-center space-y-0.5 md:space-y-1">
-                    <p className="text-[11px] md:text-[13px] text-[#799a01]">
-                      {product.category}
-                    </p>
-                    <h3 className="text-[13px] md:text-[16px] font-bold text-[#45690b] group-hover:text-[#799a01] transition-colors duration-300 line-clamp-2">
-                      {product.name}
-                    </h3>
-                    <p className="text-[13px] md:text-[15px] font-semibold text-[#1d4220]">
-                      {product.price}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+            {categories.map((cat, index) => (
+              <button
+                key={cat.label}
+                onClick={() => setActiveCategory(cat.label)}
+                className={`relative pb-3 md:pb-4 whitespace-nowrap transition-all duration-300 hover:scale-105 flex-shrink-0 ${
+                  activeCategory === cat.label
+                    ? "text-[#45690b]"
+                    : "text-gray-400 hover:text-[#799a01]"
+                }`}
+                style={{ transitionDelay: `${index * 100}ms` }}
+              >
+                <span className="text-[14px] md:text-[20px] font-bold uppercase tracking-wide">
+                  {cat.label}
+                </span>
+                <sup className="ml-1 text-[10px] md:text-[12px] font-normal">
+                  {cat.count}
+                </sup>
+                {activeCategory === cat.label && (
+                  <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#45690b] translate-y-[1.5px] animate-pulse" />
+                )}
+              </button>
+            ))}
           </div>
+        ) : null}
 
-          <button
-            onClick={() => scroll("right")}
-            className="hidden md:flex flex-shrink-0 w-10 h-10 bg-[#d9ef7f] rounded-full items-center justify-center hover:bg-[#c5e060] hover:scale-110 transition-all duration-300 shadow-md"
-          >
-            <svg
-              className="w-5 h-5 text-[#45690b]"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2.5}
+        {/* Products Carousel */}
+        {isLoading ? (
+          <div className="flex gap-4 md:gap-6 overflow-hidden">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="w-[160px] md:w-[240px] flex-shrink-0">
+                <div className="h-[180px] md:h-[260px] bg-gray-200 rounded-lg animate-pulse mb-3" />
+                <div className="h-4 bg-gray-200 rounded animate-pulse mb-2" />
+                <div className="h-5 bg-gray-200 rounded animate-pulse w-3/4 mx-auto" />
+              </div>
+            ))}
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            Chưa có sản phẩm nào trong danh mục này
+          </div>
+        ) : (
+          <div ref={productsRef} className="relative flex items-center">
+            <button
+              onClick={() => scroll("left")}
+              className="hidden md:flex flex-shrink-0 w-10 h-10 bg-[#d9ef7f] rounded-full items-center justify-center hover:bg-[#c5e060] hover:scale-110 transition-all duration-300 shadow-md"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 5l7 7-7 7"
-              />
-            </svg>
-          </button>
-        </div>
+              <svg
+                className="w-5 h-5 text-[#45690b]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 19l-7-7 7-7"
+                />
+              </svg>
+            </button>
+
+            <div
+              ref={scrollRef}
+              className={`flex-1 overflow-x-auto mx-0 md:mx-4 ${
+                isDragging ? "cursor-grabbing" : "cursor-grab"
+              }`}
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+              onMouseDown={(e) => {
+                handleMouseDown(e);
+                handleInteractionStart();
+              }}
+              onMouseMove={handleMouseMove}
+              onMouseUp={() => {
+                handleMouseUp();
+                handleInteractionEnd();
+              }}
+              onMouseLeave={() => {
+                handleMouseLeave();
+                handleInteractionEnd();
+              }}
+              onMouseEnter={handleInteractionStart}
+              onTouchStart={(e) => {
+                handleTouchStart(e);
+                handleInteractionStart();
+              }}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={() => {
+                handleTouchEnd();
+                handleInteractionEnd();
+              }}
+            >
+              <div
+                className="flex gap-4 md:gap-6"
+                style={{ width: "max-content" }}
+              >
+                {filteredProducts.map((product, index) => (
+                  <div
+                    key={index}
+                    className={`w-[160px] md:w-[240px] group cursor-pointer transition-all duration-500 ${
+                      productsVisible
+                        ? "opacity-100 translate-y-0"
+                        : "opacity-0 translate-y-10"
+                    }`}
+                    style={{ transitionDelay: `${index * 100}ms` }}
+                    onClick={() => {
+                      if (!isDragging) {
+                        setSelectedProduct(product);
+                        setSelectedSize(0);
+                      }
+                    }}
+                  >
+                    <div className="relative h-[180px] md:h-[260px] flex items-center justify-center mb-3 md:mb-4 group-hover:-translate-y-2 transition-transform duration-300">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="h-full w-auto object-contain group-hover:scale-110 transition-transform duration-300 drop-shadow-lg group-hover:drop-shadow-2xl"
+                      />
+                    </div>
+                    <div className="text-center space-y-0.5 md:space-y-1">
+                      <p className="text-[11px] md:text-[13px] text-[#799a01]">
+                        {product.category}
+                      </p>
+                      <h3 className="text-[13px] md:text-[16px] font-bold text-[#45690b] group-hover:text-[#799a01] transition-colors duration-300 line-clamp-2">
+                        {product.name}
+                      </h3>
+                      <p className="text-[13px] md:text-[15px] font-semibold text-[#1d4220]">
+                        {product.price}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => scroll("right")}
+              className="hidden md:flex flex-shrink-0 w-10 h-10 bg-[#d9ef7f] rounded-full items-center justify-center hover:bg-[#c5e060] hover:scale-110 transition-all duration-300 shadow-md"
+            >
+              <svg
+                className="w-5 h-5 text-[#45690b]"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M9 5l7 7-7 7"
+                />
+              </svg>
+            </button>
+          </div>
+        )}
 
         {/* View All Link */}
         <div className="text-center mt-12 md:mt-16">
