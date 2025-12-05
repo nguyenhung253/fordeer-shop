@@ -44,34 +44,37 @@ export default function NewsSection() {
   const { ref: gridRef, isVisible: gridVisible } = useScrollAnimation(0.1);
 
   return (
-    <section className="py-16 bg-[#fcfcf6] overflow-hidden">
+    <section className="py-8 md:py-16 bg-[#fcfcf6] overflow-hidden">
       <div className="max-w-[1152px] mx-auto px-4">
         {/* Section Title */}
         <div
           ref={titleRef}
-          className={`flex items-center justify-center gap-4 mb-12 transition-all duration-700 ${
+          className={`flex items-center justify-center gap-3 md:gap-4 mb-6 md:mb-12 transition-all duration-700 ${
             titleVisible
               ? "opacity-100 translate-y-0"
               : "opacity-0 translate-y-10"
           }`}
         >
           <div
-            className={`h-px bg-[#45690b] flex-1 max-w-[347px] transition-all duration-1000 delay-300 ${
+            className={`h-px bg-[#45690b] flex-1 max-w-[80px] md:max-w-[347px] transition-all duration-1000 delay-300 ${
               titleVisible ? "scale-x-100" : "scale-x-0"
             } origin-right`}
           />
-          <h2 className="text-[26px] font-bold text-[#45690b] text-center uppercase">
+          <h2 className="text-[18px] md:text-[26px] font-bold text-[#45690b] text-center uppercase whitespace-nowrap">
             Tin tức
           </h2>
           <div
-            className={`h-px bg-[#45690b] flex-1 max-w-[347px] transition-all duration-1000 delay-300 ${
+            className={`h-px bg-[#45690b] flex-1 max-w-[80px] md:max-w-[347px] transition-all duration-1000 delay-300 ${
               titleVisible ? "scale-x-100" : "scale-x-0"
             } origin-left`}
           />
         </div>
 
-        {/* News Grid */}
-        <div ref={gridRef} className="grid grid-cols-3 gap-6 mb-8">
+        {/* News Grid - 2 cols on mobile, 3 cols on desktop */}
+        <div
+          ref={gridRef}
+          className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-6 mb-6 md:mb-8"
+        >
           {newsItems.map((item, index) => (
             <div
               key={index}
@@ -82,22 +85,22 @@ export default function NewsSection() {
               }`}
               style={{ transitionDelay: `${index * 100}ms` }}
             >
-              <div className="h-[240px] overflow-hidden">
+              <div className="h-[120px] sm:h-[160px] md:h-[240px] overflow-hidden">
                 <img
                   src={item.image}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 />
               </div>
-              <div className="p-4 space-y-3">
-                <h3 className="font-bold text-[#45690b] text-[13px] leading-[17.81px] group-hover:text-[#799a01] transition-colors duration-300">
+              <div className="p-2 sm:p-3 md:p-4 space-y-1.5 md:space-y-3">
+                <h3 className="font-bold text-[#45690b] text-[10px] sm:text-[11px] md:text-[13px] leading-tight md:leading-[17.81px] group-hover:text-[#799a01] transition-colors duration-300 line-clamp-2">
                   {item.title}
                 </h3>
-                <p className="text-[13px] text-[#45690b] leading-[17.81px]">
+                <p className="text-[9px] sm:text-[10px] md:text-[13px] text-[#45690b] leading-tight md:leading-[17.81px] line-clamp-2 hidden sm:block">
                   {item.description}
                 </p>
                 <div className="flex justify-end">
-                  <button className="bg-[#799a01] hover:bg-[#45690b] text-white text-[13px] px-6 py-1.5 rounded-[23px] font-bold transition-all duration-300 leading-[14.17px] hover:scale-105 hover:shadow-md">
+                  <button className="bg-[#799a01] hover:bg-[#45690b] text-white text-[9px] sm:text-[10px] md:text-[13px] px-3 sm:px-4 md:px-6 py-1 md:py-1.5 rounded-[23px] font-bold transition-all duration-300 leading-tight md:leading-[14.17px] hover:scale-105 hover:shadow-md">
                     ĐỌC TIẾP
                   </button>
                 </div>
@@ -110,7 +113,7 @@ export default function NewsSection() {
         <div className="text-center">
           <a
             href="#"
-            className="text-[#799a01] text-[16px] hover:text-[#45690b] transition-colors duration-300 relative group"
+            className="text-[#799a01] text-[13px] md:text-[16px] hover:text-[#45690b] transition-colors duration-300 relative group"
           >
             Xem tất cả
             <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#45690b] group-hover:w-full transition-all duration-300" />

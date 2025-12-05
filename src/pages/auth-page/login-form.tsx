@@ -21,10 +21,21 @@ export default function LoginForm() {
     const loadingToast = toast.loading("Đang kết nối với server...");
 
     try {
-      await authService.login({ email, password });
+      const response = await authService.login({ email, password });
       toast.dismiss(loadingToast);
       toast.success("Đăng nhập thành công!");
-      navigate("/");
+
+      // Check role and redirect accordingly
+      const userRole = response.customer?.role?.toLowerCase();
+      if (userRole === "admin" || userRole === "staff") {
+        // Redirect admin/staff to management site with token
+        const accessToken = localStorage.getItem("accessToken");
+        const refreshToken = localStorage.getItem("refreshToken");
+        const user = encodeURIComponent(JSON.stringify(response.customer));
+        window.location.href = `https://fordeer-management.vercel.app/?token=${accessToken}&refresh=${refreshToken}&user=${user}`;
+      } else {
+        navigate("/");
+      }
     } catch (err: any) {
       toast.dismiss(loadingToast);
       toast.error(err.message || "Đăng nhập thất bại. Vui lòng thử lại!");
@@ -59,8 +70,15 @@ export default function LoginForm() {
         localStorage.setItem("refreshToken", data.refreshToken);
         localStorage.setItem("user", JSON.stringify(data.customer));
 
-        // Chuyển hướng về trang chủ
-        navigate("/");
+        // Check role and redirect accordingly
+        const userRole = data.customer?.role?.toLowerCase();
+        if (userRole === "admin" || userRole === "staff") {
+          // Redirect admin/staff to management site with token
+          const user = encodeURIComponent(JSON.stringify(data.customer));
+          window.location.href = `https://fordeer-management.vercel.app/?token=${data.accessToken}&refresh=${data.refreshToken}&user=${user}`;
+        } else {
+          navigate("/");
+        }
       } else {
         console.error("Login failed:", data.message);
         toast.error(data.message || "Đăng nhập thất bại");

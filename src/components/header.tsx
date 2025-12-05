@@ -10,14 +10,13 @@ export default function Header() {
     authService.isAuthenticated()
   );
   const [cartCount, setCartCount] = useState(cartService.getItemCount());
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    // Listen for user updates to refresh auth state
     const handleUserUpdate = () => {
       setIsAuthenticated(authService.isAuthenticated());
     };
 
-    // Listen for cart updates
     const handleCartUpdate = () => {
       setCartCount(cartService.getItemCount());
     };
@@ -31,93 +30,142 @@ export default function Header() {
     };
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location.pathname]);
+
   const isActive = (path: string) => location.pathname === path;
 
-  return (
-    <header className="bg-[#fcfcf6] sticky top-0 z-50">
-      <div className="max-w-[1152px] mx-auto px-4 h-[75px] flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center">
-          <img src="/Frame 3.png" alt="Fordeer Coffee" className="h-12" />
-        </Link>
+  const navLinks = [
+    { path: "/order", label: "Đặt hàng" },
+    { path: "/news", label: "Bảng tin" },
+    { path: "/stores", label: "Cửa hàng" },
+    { path: "/about", label: "About us" },
+    { path: "/recruitment", label: "Tuyển dụng" },
+  ];
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-8">
-          <Link
-            to="/order"
-            className={`text-[13px] font-bold transition-colors uppercase tracking-wide ${
-              isActive("/order")
-                ? "text-[#42612e]"
-                : "text-[#9cc019] hover:text-[#45690b]"
-            }`}
+  return (
+    <header className="bg-[#fcfcf6] sticky top-0 z-50 shadow-sm">
+      <div className="max-w-[1152px] mx-auto px-4 h-[60px] md:h-[75px] flex items-center justify-between">
+        {/* Left: Mobile Menu Button + Logo (on mobile, logo next to hamburger) */}
+        <div className="flex items-center gap-2 md:gap-0">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden p-2 -ml-2 text-[#45690b]"
+            aria-label="Menu"
           >
-            Đặt hàng
+            {mobileMenuOpen ? (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            ) : (
+              <svg
+                className="w-6 h-6"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            )}
+          </button>
+
+          {/* Logo - next to hamburger on mobile */}
+          <Link to="/" className="flex items-center">
+            <img
+              src="/Frame 3.png"
+              alt="Fordeer Coffee"
+              className="h-10 md:h-12"
+            />
           </Link>
-          <Link
-            to="/news"
-            className={`text-[13px] font-bold transition-colors uppercase tracking-wide ${
-              isActive("/news")
-                ? "text-[#42612e]"
-                : "text-[#9cc019] hover:text-[#45690b]"
-            }`}
-          >
-            Bảng tin
-          </Link>
-          <Link
-            to="/stores"
-            className={`text-[13px] font-bold transition-colors uppercase tracking-wide ${
-              isActive("/stores")
-                ? "text-[#42612e]"
-                : "text-[#9cc019] hover:text-[#45690b]"
-            }`}
-          >
-            Cửa hàng
-          </Link>
-          <Link
-            to="/about"
-            className={`text-[13px] font-bold transition-colors uppercase tracking-wide ${
-              isActive("/about")
-                ? "text-[#42612e]"
-                : "text-[#9cc019] hover:text-[#45690b]"
-            }`}
-          >
-            About us
-          </Link>
-          <Link
-            to="/recruitment"
-            className={`text-[13px] font-bold transition-colors uppercase tracking-wide ${
-              isActive("/recruitment")
-                ? "text-[#42612e]"
-                : "text-[#9cc019] hover:text-[#45690b]"
-            }`}
-          >
-            Tuyển dụng
-          </Link>
+        </div>
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 flex-1 justify-center">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`text-[12px] lg:text-[13px] font-bold transition-colors uppercase tracking-wide ${
+                isActive(link.path)
+                  ? "text-[#42612e]"
+                  : "text-[#9cc019] hover:text-[#45690b]"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
         </nav>
 
-        {/* Actions */}
-        <div className="flex items-center gap-4">
+        {/* Right: Actions - pushed to right edge */}
+        <div className="flex items-center gap-3 md:gap-4">
           <Link
             to="/cart"
             className="hover:opacity-80 transition-opacity relative"
           >
-            <img src="/cart.png" alt="Giỏ hàng" className="w-7 h-7" />
+            <img
+              src="/cart.png"
+              alt="Giỏ hàng"
+              className="w-6 h-6 md:w-7 md:h-7"
+            />
             {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 bg-[#ff6b35] text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">
+              <span className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-[#ff6b35] text-white text-[9px] md:text-[10px] font-bold w-4 h-4 md:w-5 md:h-5 rounded-full flex items-center justify-center">
                 {cartCount > 99 ? "99+" : cartCount}
               </span>
             )}
           </Link>
 
-          {/* Show Profile Dropdown if authenticated, otherwise show login link */}
           {isAuthenticated ? (
             <ProfileDropdown />
           ) : (
             <Link to="/login" className="hover:opacity-80 transition-opacity">
-              <img src="/user.png" alt="Đăng nhập" className="w-7 h-7" />
+              <img
+                src="/user.png"
+                alt="Đăng nhập"
+                className="w-6 h-6 md:w-7 md:h-7"
+              />
             </Link>
           )}
         </div>
+      </div>
+
+      {/* Mobile Navigation Menu */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-300 bg-[#fcfcf6] border-t border-[#e5e5e5] ${
+          mobileMenuOpen ? "max-h-[400px]" : "max-h-0"
+        }`}
+      >
+        <nav className="px-4 py-3 space-y-1">
+          {navLinks.map((link) => (
+            <Link
+              key={link.path}
+              to={link.path}
+              className={`block py-3 px-4 rounded-lg text-[14px] font-bold uppercase tracking-wide transition-colors ${
+                isActive(link.path)
+                  ? "text-[#42612e] bg-[#d9ef7f]/30"
+                  : "text-[#9cc019] hover:bg-[#d9ef7f]/20"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       </div>
     </header>
   );
